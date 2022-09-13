@@ -3,10 +3,14 @@ global.THREE = require('three');
 const canvasSketch = require('canvas-sketch');
 const random = require('canvas-sketch-util/random');
 const palettes = require('nice-color-palettes');
+const eases = require('eases');
+const BezierEasing = require('bezier-easing');
 
 const settings = {
   animate: true,
-  dimensions: [ 1024, 1280 ],
+  dimensions: [ 512, 512 ],
+  fps: 24,
+  duration: 4,
   // Get a WebGL canvas rather than 2D
   context: 'webgl',
   // Turn on MSAA
@@ -66,6 +70,8 @@ const sketch = ({ context, width, height }) => {
   light.position.set(2, 2, 4);
   scene.add(light);
 
+  const easeFn = BezierEasing(0.67, 0.03, 0.29, 0.99);
+
   // draw each frame
   return {
     // Handle resize events here
@@ -96,8 +102,11 @@ const sketch = ({ context, width, height }) => {
       camera.updateProjectionMatrix();
     },
     // And render events here
-    render ({ time }) {
+    render ({ playhead }) {
       // Draw scene with our camera
+      const t = Math.sin(playhead * Math.PI);
+      // scene.rotation.z = eases.expoInOut(t);
+      scene.rotation.z = easeFn(t);
       renderer.render(scene, camera);
     },
     // Dispose of WebGL context (optional)
